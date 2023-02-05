@@ -9,7 +9,7 @@ BOARD_WIDTH = 7
 BOARD_HEIGHT = 7
 TILE_SIZE = 100
 
-SCREEN_WIDTH = BOARD_WIDTH*TILE_SIZE+168
+SCREEN_WIDTH = BOARD_WIDTH*TILE_SIZE+158
 SCREEN_HEIGHT = BOARD_HEIGHT*TILE_SIZE
 FRAMERATE = 75
 
@@ -96,7 +96,12 @@ def init_assets():
             images[(Team.BLUE, image_id)] = image.copy()
             images[(Team.RED, image_id)] = rehue_image(image)
         if image_id == ImageId.BOARD:
-            image = pygame.transform.scale(image, (TILE_SIZE*BOARD_WIDTH, TILE_SIZE*BOARD_HEIGHT))
+            image = pygame.transform.chop(
+                pygame.transform.scale(image, (TILE_SIZE*7, TILE_SIZE*7)),
+                (BOARD_WIDTH*TILE_SIZE-(7-BOARD_WIDTH)*TILE_SIZE+100,
+                 BOARD_HEIGHT*TILE_SIZE-(7-BOARD_HEIGHT)*TILE_SIZE+100,
+                 100, 100)
+            )
             images[(Team.NOTEAM, image_id)] = image
             continue
     for _ in range(30):
@@ -123,6 +128,19 @@ def draw_outline(screen: pygame.Surface, x: int, y: int):
 
 def clamp(n: Union[float, int], a: Union[float, int], b: Union[float, int]):
     return max(min(b, n), a)
+
+
+def rotated_pos(p: tuple[int, int], rotated: bool):
+    if rotated:
+        return BOARD_WIDTH-p[0]-1, BOARD_HEIGHT-p[1]-1
+    return p
+
+
+def rotated_big_pos(p: tuple[int, int], rotated: bool):
+    if rotated:
+        mp = pygame.mouse.get_pos()
+        return BOARD_WIDTH*TILE_SIZE-mp[0], BOARD_HEIGHT*TILE_SIZE-mp[1]
+    return p
 
 
 def play_sound(sound: SoundId, volume=0.7):

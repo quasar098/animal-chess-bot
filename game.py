@@ -5,14 +5,20 @@ from toolbar import Toolbar
 
 class Game:
     def __init__(self):
+        pygame.init()
         self.history = [Board(self)]
         self.history_index = 0
         self.toolbar: Optional[Toolbar] = None
         self.surface: Optional[pygame.Surface] = None
+        self.rotated = False
 
     @property
     def board(self):
         return self.history[self.history_index]
+
+    @board.setter
+    def board(self, val: Board):
+        self.history[self.history_index] = val
 
     def loop(self):
         pygame.init()
@@ -33,7 +39,7 @@ class Game:
                 if self.board.handle_events(event):
                     self.history_index += 1
                     self.history.insert(self.history_index-1, bc)
-                    self.board.turns_passed += 1
+                    self.history = self.history[:self.history_index+1]
 
             # code here
             self.board.draw((0, 0))

@@ -16,13 +16,15 @@ class Piece:
     def at_end(self):
         return self.team == Team.RED and self.y == 6 or self.team == Team.BLUE and self.y == 0
 
-    def draw(self, screen: pygame.Surface, grabbed_piece):
+    def draw(self, screen: pygame.Surface, grabbed_piece, rotated: bool):
+        bw, bh = BOARD_WIDTH*TILE_SIZE, BOARD_HEIGHT*TILE_SIZE
         if self == grabbed_piece:
             mp = pygame.mouse.get_pos()
-            mp = clamp(mp[0], -50, BOARD_WIDTH*TILE_SIZE), clamp(mp[1], -50, BOARD_HEIGHT*TILE_SIZE)
+            mp = clamp(mp[0], -50, bw), clamp(mp[1], -50, bh)
             screen.blit(images[(self.team, self.image_id)], (mp[0]-50, mp[1]-50))
             return
-        screen.blit(images[(self.team, self.image_id)], (self.x*TILE_SIZE, self.y*TILE_SIZE))
+        pos = rotated_pos(self.pos, rotated)
+        screen.blit(images[(self.team, self.image_id)], [po*TILE_SIZE for po in pos])
     
     @property
     def rect(self):
