@@ -42,8 +42,12 @@ class Toolbar:
         return self.go_forward_rect.move(0, self.go_forward_rect.height+10+8)
 
     @property
+    def who_is_winning_pos(self):
+        return self.rect.move(0, 140).topleft
+
+    @property
     def moves_rect(self):
-        return self.rect.move(0, 140).inflate(-18, -18)
+        return self.rect.move(0, 170).inflate(-18, -18)
 
     def draw(self, screen: pygame.Surface):
         pygame.draw.rect(
@@ -74,11 +78,12 @@ class Toolbar:
         )
         screen.blit(self.hint, self.hint.get_rect(topright=self.hint_rect.topright))
 
+        self.game.surface.blit(self.medium_font_text(self.get_win_diff()), self.who_is_winning_pos)
+
         moves = [hist.last_move_pair for hist in self.game.history if hist.last_move_pair is not None]
         pygame.draw.rect(self.game.surface, (60, 60, 63), self.moves_rect.inflate(8, 8), border_radius=4)
         for index, move in enumerate(moves.__reversed__()):
             alphabet = "abcdefghijklmnopqrstuvwxyz"
-            numbers = "1234567890"
             text = f"{alphabet[move[0][0]]}{BOARD_HEIGHT-move[0][1]} to " \
                    f"{alphabet[move[1][0]]}{BOARD_HEIGHT-move[1][1]}"
 
@@ -87,6 +92,33 @@ class Toolbar:
                     topleft=(self.moves_rect.x, self.moves_rect.y+index*30)
                 ).inflate(4, 4))
             self.game.surface.blit(self.medium_font_text(text), (self.moves_rect.x, self.moves_rect.y+index*30))
+
+    def get_win_diff(self):
+        scores = {
+            Team.BLUE: 0,
+            Team.RED: 0
+        }
+        score_map = {
+            Goose: 1,
+            Knight: 3,
+            Monkey: 3,
+            Buffalo: 5,
+            Cobra: 6,
+            Pedestrian: 1000,
+            Piece: -100
+        }
+        for piece in self.game.board.pieces:
+            scores[piece.team] += score_map[type(piece)]
+        offset = scores[Team.BLUE]-scores[Team.RED]
+        if offset > 200:
+            return f"blue wins"
+        elif offset < -200:
+            return f"red wins"
+        elif offset > 0:
+            return f"blue up {offset} points"
+        elif offset < 0:
+            return f"red up {-offset} points"
+        return "equal points"
 
     def medium_font_text(self, text: str):
         if text not in self.medium_font_cache:
