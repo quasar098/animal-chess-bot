@@ -7,15 +7,18 @@ class Toolbar:
         self.game = game
 
         # https://onlineasciitools.com/generate-ascii-characters to find which ones are which
-        self.font = pygame.font.Font(join("assets", "chessglyph.ttf"), 25)
-        self.big_font = pygame.font.Font(join("assets", "chessglyph.ttf"), 50)
+        self.medium_glyph = pygame.font.Font(join("assets", "chessglyph.ttf"), 25)
+        self.big_glyph = pygame.font.Font(join("assets", "chessglyph.ttf"), 50)
+
+        self.medium_font = pygame.font.SysFont("Arial", 20)
+        self.medium_font_cache = {}
 
         # symbols
         dull_color = pygame.Color(220, 220, 220)
-        self.rotate = self.big_font.render("\u0066", True, dull_color)
-        self.hint = self.big_font.render("\u0067", True, dull_color)
-        self.big_left = self.big_font.render("[", True, dull_color)
-        self.big_right = self.big_font.render("]", True, dull_color)
+        self.rotate = self.big_glyph.render("\u0066", True, dull_color)
+        self.hint = self.big_glyph.render("\u0067", True, dull_color)
+        self.big_left = self.big_glyph.render("[", True, dull_color)
+        self.big_right = self.big_glyph.render("]", True, dull_color)
 
     @property
     def rect(self):
@@ -37,6 +40,10 @@ class Toolbar:
     @property
     def hint_rect(self):
         return self.go_forward_rect.move(0, self.go_forward_rect.height+10+8)
+
+    @property
+    def moves_rect(self):
+        return self.rect.move(0, 140).inflate(-18, -18)
 
     def draw(self, screen: pygame.Surface):
         pygame.draw.rect(
@@ -66,6 +73,25 @@ class Toolbar:
             border_radius=4
         )
         screen.blit(self.hint, self.hint.get_rect(topright=self.hint_rect.topright))
+
+        moves = [hist.last_move_pair for hist in self.game.history if hist.last_move_pair is not None]
+        pygame.draw.rect(self.game.surface, (60, 60, 63), self.moves_rect.inflate(8, 8), border_radius=4)
+        for index, move in enumerate(moves.__reversed__()):
+            alphabet = "abcdefghijklmnopqrstuvwxyz"
+            numbers = "1234567890"
+            text = f"{alphabet[move[0][0]]}{BOARD_HEIGHT-move[0][1]} to " \
+                   f"{alphabet[move[1][0]]}{BOARD_HEIGHT-move[1][1]}"
+
+            if -index+len(self.game.history)-1 == self.game.history_index:
+                pygame.draw.rect(self.game.surface, (70, 70, 73), self.medium_font_text(text).get_rect(
+                    topleft=(self.moves_rect.x, self.moves_rect.y+index*30)
+                ).inflate(4, 4))
+            self.game.surface.blit(self.medium_font_text(text), (self.moves_rect.x, self.moves_rect.y+index*30))
+
+    def medium_font_text(self, text: str):
+        if text not in self.medium_font_cache:
+            self.medium_font_cache[text] = self.medium_font.render(text, True, (255, 255, 255))
+        return self.medium_font_cache[text]
 
     def handle_events(self, event: pygame.event.Event):
         if event.type == pygame.MOUSEBUTTONDOWN:
