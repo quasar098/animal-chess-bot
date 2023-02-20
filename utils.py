@@ -3,6 +3,7 @@ import pygame
 from typing import Optional, Union
 from os.path import join
 from typing import TYPE_CHECKING
+from time import perf_counter
 
 
 BOARD_WIDTH = 7
@@ -20,6 +21,11 @@ class Team(Enum):
     NOTEAM = -1
     BLUE = 0
     RED = 1
+
+
+def other_team(team: Team):
+    assert team != Team.NOTEAM, "should not be no team"
+    return Team.RED if team == Team.BLUE else Team.RED
 
 
 class ImageId(Enum):

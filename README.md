@@ -6,29 +6,15 @@ see [quasar.name](https://quasar.name) for more info
 # openings
 
 opening lines for animal chess
-can be mirrored (g1 to e3 is same as a1 to c3)
+can be mirrored (g1e3 == a1c3)
 
-## mongolian opening
-
-- g1 to e3
-
-### warehouse defense
-
-- b7 to c5
-
-## mount opening
-
-- f1 to e3
-
-### duel response
-
-- b7 to c5
-
-### cicada gambit
-
-- g7 to f5
-
-#### cicada gambit accepted
-
-
-#### cicada gambit declined
+```
+Start position
+├── mongolian opening (g1e3)
+│   └── warehouse defense (b7c5)
+└── mount opening (f1e3)
+    ├── duel response (b7c5)
+    └── cicada gambit (g7f5)
+        ├── accepted (e3f5)
+        └── declined (e3c4)
+```

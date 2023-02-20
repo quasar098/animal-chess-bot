@@ -22,8 +22,8 @@ class Toolbar:
 
     @property
     def rect(self):
-        return pygame.Rect(BOARD_WIDTH*TILE_SIZE+8, 8, SCREEN_WIDTH-(BOARD_WIDTH*TILE_SIZE)-16,
-                           BOARD_HEIGHT*TILE_SIZE-16)
+        return pygame.Rect(BOARD_WIDTH * TILE_SIZE + 8, 8, SCREEN_WIDTH - (BOARD_WIDTH * TILE_SIZE) - 16,
+                           BOARD_HEIGHT * TILE_SIZE - 16)
 
     @property
     def go_back_rect(self):
@@ -35,11 +35,11 @@ class Toolbar:
 
     @property
     def rotate_board_rect(self):
-        return self.go_back_rect.move(0, self.go_back_rect.height+10+8)
+        return self.go_back_rect.move(0, self.go_back_rect.height + 10 + 8)
 
     @property
     def hint_rect(self):
-        return self.go_forward_rect.move(0, self.go_forward_rect.height+10+8)
+        return self.go_forward_rect.move(0, self.go_forward_rect.height + 10 + 8)
 
     @property
     def who_is_winning_pos(self):
@@ -84,14 +84,28 @@ class Toolbar:
         pygame.draw.rect(self.game.surface, (60, 60, 63), self.moves_rect.inflate(8, 8), border_radius=4)
         for index, move in enumerate(moves.__reversed__()):
             alphabet = "abcdefghijklmnopqrstuvwxyz"
-            text = f"{alphabet[move[0][0]]}{BOARD_HEIGHT-move[0][1]} to " \
-                   f"{alphabet[move[1][0]]}{BOARD_HEIGHT-move[1][1]}"
+            text = f"{alphabet[move[0][0]]}{BOARD_HEIGHT - move[0][1]}" \
+                   f"{alphabet[move[1][0]]}{BOARD_HEIGHT - move[1][1]}"
 
-            if -index+len(self.game.history)-1 == self.game.history_index:
+            text_pos = (
+                self.moves_rect.x + (
+                        ((self.moves_rect.y + index * 30) - self.moves_rect.top + 8) //
+                        (SCREEN_HEIGHT - self.moves_rect.top)) * 60,
+                (
+                        ((self.moves_rect.y + index * 30) - self.moves_rect.top + 8)
+                        % (SCREEN_HEIGHT - self.moves_rect.top) + self.moves_rect.top - 8
+                )
+            )
+
+            if (((self.moves_rect.y + index * 30) - self.moves_rect.top + 8) //
+                    (SCREEN_HEIGHT - self.moves_rect.top)) > 1:
+                continue
+
+            if -index + len(self.game.history) - 1 == self.game.history_index:
                 pygame.draw.rect(self.game.surface, (70, 70, 73), self.medium_font_text(text).get_rect(
-                    topleft=(self.moves_rect.x, self.moves_rect.y+index*30)
+                    topleft=text_pos
                 ).inflate(4, 4))
-            self.game.surface.blit(self.medium_font_text(text), (self.moves_rect.x, self.moves_rect.y+index*30))
+            self.game.surface.blit(self.medium_font_text(text), text_pos)
 
     def get_win_diff(self):
         scores = {
@@ -109,15 +123,16 @@ class Toolbar:
         }
         for piece in self.game.board.pieces:
             scores[piece.team] += score_map[type(piece)]
-        offset = scores[Team.BLUE]-scores[Team.RED]
+        offset = scores[Team.BLUE] - scores[Team.RED]
+        adds = (abs(offset) != 1) * "s"
         if offset > 200:
             return f"blue wins"
         elif offset < -200:
             return f"red wins"
         elif offset > 0:
-            return f"blue up {offset} points"
+            return f"blue up {offset} point{adds}"
         elif offset < 0:
-            return f"red up {-offset} points"
+            return f"red up {-offset} point{adds}"
         return "equal points"
 
     def medium_font_text(self, text: str):
@@ -129,9 +144,9 @@ class Toolbar:
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
                 if self.go_back_rect.inflate(10, 10).collidepoint(pygame.mouse.get_pos()):
-                    self.game.history_index = clamp(self.game.history_index-1, 0, len(self.game.history)-1)
+                    self.game.history_index = clamp(self.game.history_index - 1, 0, len(self.game.history) - 1)
                 if self.go_forward_rect.inflate(10, 10).collidepoint(pygame.mouse.get_pos()):
-                    self.game.history_index = clamp(self.game.history_index+1, 0, len(self.game.history)-1)
+                    self.game.history_index = clamp(self.game.history_index + 1, 0, len(self.game.history) - 1)
                 if self.hint_rect.inflate(10, 10).collidepoint(pygame.mouse.get_pos()):
                     Bot.make_best_move(self.game)
                 if self.rotate_board_rect.inflate(10, 10).collidepoint(pygame.mouse.get_pos()):

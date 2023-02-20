@@ -4,19 +4,22 @@ if TYPE_CHECKING:
 
 
 class Board:
+    FONT = None
+
     def __init__(self, game):
         self.pieces: list[Piece] = []
         self.game: Game = game
         self.init_piece_locations()
 
         letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".lower()
-        self.font = pygame.font.SysFont("Segoe UI semibold", 20)
+        if Board.FONT is None:
+            Board.FONT = pygame.font.SysFont("Segoe UI semibold", 20)
         self.dark_letters = {}
         self.light_letters = {}
 
         for _ in letters:
-            self.dark_letters[_] = self.font.render(_, True, (141, 103, 94))
-            self.light_letters[_] = self.font.render(_, True, (231, 205, 178))
+            self.dark_letters[_] = self.FONT.render(_, True, (141, 103, 94))
+            self.light_letters[_] = self.FONT.render(_, True, (231, 205, 178))
 
         self.last_move_pair: Optional[tuple[tuple[int, int], tuple[int, int]]] = None
         self.grabbed_piece: Optional[Piece] = None
@@ -27,7 +30,7 @@ class Board:
     def __repr__(self):
         return f"<Board()>"
 
-    def copy(self):
+    def copy(self) -> "Board":
         new = Board(self.game)
         new.pieces = [piece.copy() for piece in self.pieces]
         new.last_move_pair = self.last_move_pair
@@ -87,7 +90,7 @@ class Board:
     def flip_turn(self):
         self.whose_turn = Team.RED if self.whose_turn == Team.BLUE else Team.BLUE
 
-    def moves(self):
+    def moves(self) -> list["Board"]:
         moves: list["Board"] = []
         occupied = [piece.pos for piece in self.pieces if piece.team != self.whose_turn]
         for piece in self.pieces:
@@ -99,7 +102,8 @@ class Board:
                 new = self.make_copy_with_move(piece.pos, move)
                 new.flip_turn()
                 moves.append(new)
-        return sorted(moves, key=Board.get_who_is_winning, reverse=self.whose_turn == Team.RED)
+        moves = sorted(moves, key=Board.get_who_is_winning, reverse=self.whose_turn == Team.RED)
+        return moves
 
     @property
     def finished(self):
@@ -109,6 +113,7 @@ class Board:
         copy = self.copy()
         original = [co for co in copy.pieces if co.pos == origin][0]
         copy.pieces = [piece for piece in copy.pieces if piece.pos != dest or piece.team != self.whose_turn]
+        copy.last_move_pair = (original.pos, dest)
         original.pos = dest
         if original.at_end and isinstance(original, Goose):
             copy.pieces.remove(original)
@@ -116,6 +121,7 @@ class Board:
         return copy
 
     def get_who_is_winning(self):
+        """0 = red is winning, 100 = blue is winning"""
         # 0 = red, 100 = blue
         scores = {
             Team.BLUE: 0,
