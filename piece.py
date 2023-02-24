@@ -9,12 +9,13 @@ class Piece:
         self.y = y
         self.team: Optional[Team] = team
 
-    def copy(self):
-        return type(self)(self.x, self.y, self.team)
-
     @property
     def at_end(self):
         return self.team == Team.RED and self.y == 6 or self.team == Team.BLUE and self.y == 0
+
+    def copy(self):
+        thing = type(self)(self.x, self.y, self.team)
+        return thing
 
     def draw(self, screen: pygame.Surface, grabbed_piece, rotated: bool):
         bw, bh = BOARD_WIDTH*TILE_SIZE, BOARD_HEIGHT*TILE_SIZE
@@ -53,6 +54,10 @@ class Goose(Piece):
     def __init__(self, x: int, y: int, team: Team):
         super().__init__(x, y, team)
 
+    def copy(self):
+        thing = Goose(self.x, self.y, self.team)
+        return thing
+
     def _get_moveable_offsets(self):
         return (0, 1), (0, 2)
 
@@ -61,6 +66,10 @@ class Knight(Piece):
     def __init__(self, x: int, y: int, team: Team):
         super().__init__(x, y, team)
         self.image_id = ImageId.KNIGHT
+
+    def copy(self):
+        thing = Knight(self.x, self.y, self.team)
+        return thing
 
     def _get_moveable_offsets(self):
         return (2, 1), (1, 2), (-1, 2), (-2, 1), (1, -2), (2, -1), (-2, -1), (-1, -2)
@@ -72,6 +81,10 @@ class Monkey(Piece):
     def __init__(self, x: int, y: int, team: Team):
         super().__init__(x, y, team)
 
+    def copy(self):
+        thing = Monkey(self.x, self.y, self.team)
+        return thing
+
     def _get_moveable_offsets(self):
         return (2, 0), (1, 1), (0, 2), (-1, 1), (-2, 0), (-1, -1), (0, -2), (1, -1)
 
@@ -81,6 +94,10 @@ class Buffalo(Piece):
 
     def __init__(self, x: int, y: int, team: Team):
         super().__init__(x, y, team)
+
+    def copy(self):
+        thing = Buffalo(self.x, self.y, self.team)
+        return thing
 
     def _get_moveable_offsets(self):
         return (1, 1), (2, 1), (1, 2), (2, 2), (-2, 1), (-1, 1), (-1, 2), (-2, 2), (0, -1)
@@ -92,6 +109,10 @@ class Cobra(Piece):
     def __init__(self, x: int, y: int, team: Team):
         super().__init__(x, y, team)
 
+    def copy(self):
+        thing = Cobra(self.x, self.y, self.team)
+        return thing
+
     def _get_moveable_offsets(self):
         return [(x, y) for x in range(-2, 3) for y in range(-2, 3) if max(abs(x), abs(y)) == 2]
 
@@ -101,6 +122,10 @@ class Pedestrian(Piece):
 
     def __init__(self, x: int, y: int, team: Team):
         super().__init__(x, y, team)
+
+    def copy(self):
+        thing = Pedestrian(self.x, self.y, self.team)
+        return thing
 
     def _get_moveable_offsets(self):
         return [(x, y) for x in range(-2, 3) for y in range(-2, 3) if max(abs(x), abs(y)) == 1]

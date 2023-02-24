@@ -35,10 +35,10 @@ class Game:
                 if event.type == pygame.QUIT:
                     running = False
                 self.toolbar.handle_events(event)
-                bc = self.board.copy()
+                old_board = self.board.copy()
                 if self.board.handle_events(event):
                     self.history_index += 1
-                    self.history.insert(self.history_index-1, bc)
+                    self.history.insert(self.history_index-1, old_board)
                     self.history = self.history[:self.history_index+1]
 
             # code here

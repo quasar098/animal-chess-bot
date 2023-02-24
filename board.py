@@ -93,16 +93,18 @@ class Board:
     def moves(self) -> list["Board"]:
         moves: list["Board"] = []
         occupied = [piece.pos for piece in self.pieces if piece.team != self.whose_turn]
+        mk = self.make_copy_with_move
         for piece in self.pieces:
             if piece.team == self.whose_turn:
                 continue
             movings = [o for o in piece.offsets
                        if 0 <= o[0] < BOARD_WIDTH and 0 <= o[1] < BOARD_HEIGHT and o not in occupied]
             for move in movings:
-                new = self.make_copy_with_move(piece.pos, move)
+                new = mk(piece.pos, move)
                 new.flip_turn()
                 moves.append(new)
-        moves = sorted(moves, key=Board.get_who_is_winning, reverse=self.whose_turn == Team.RED)
+        key = Board.get_who_is_winning
+        moves = sorted(moves, key=key, reverse=self.whose_turn == Team.RED)
         return moves
 
     @property
